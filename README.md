@@ -1,6 +1,8 @@
 # psmon
 Process monitor. Currently only support linux system. If those process that had been configured was killed or exit normally, it will be relaunched.
 
+Hello.jar and Hello2.jar are the same. It only print hello message using "System.out.println" then sleep 5 seconds in a dead loop.
+
 # install
 make && make clear
 
@@ -13,9 +15,13 @@ on Fedora, CentOS, RHEL, etc. "openssl-devel" must be installed.
 PSMON_HOME enviroment must be set, or it will use the default /opt/psmon directory. For example, run it like this:
 
 export PSMON_HOME=`pwd`
+
 ./psmon
+
 ./pscli status
+
 ./pscli stop hello
+
 ./pscli start hello
 
 If you kill psomn with -9, you should use "./psmon -d" before restart it.
