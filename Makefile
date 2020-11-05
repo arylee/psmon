@@ -3,18 +3,18 @@
 GCC=g++
 COPY=cp
 REMOVE=rm -rf
-CCLIB=-lpthread -lcrypto
+CCLIB=-lpthread
 GCCFLAGS=-O3 -Wall -mtune=core2 -msse4.2 -pthread -g
 
 all_exes=$(psmon_exe) $(pscli_exe)
 
-psmon_obj=AESCrypt.o ConfigFile.o Configure.o Logger.o Utils.o \
+psmon_obj=ConfigFile.o Configure.o Logger.o Utils.o \
 	Socket.o SocketUnix.o BaseDaemon.o PsmonDaemon.o \
 	ProcessManager.o WorkerProcess.o PSMON.o
 
 psmon_exe=psmon
 
-pscli_obj=AESCrypt.o ConfigFile.o Configure.o Logger.o Utils.o \
+pscli_obj=ConfigFile.o Configure.o Logger.o Utils.o \
 	Socket.o SocketUnix.o PSCLI.o
 
 pscli_exe=pscli

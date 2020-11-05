@@ -17,8 +17,6 @@
 // 单态指针
 Configure* Configure::_instance = NULL;
 
-const std::string Configure::_aes_key = "690C7B1C1D5C2B2C0F6B0D263648605F";
-
 std::string Configure::_conf_dir;
 std::string Configure::_data_dir;
 std::string Configure::_home_dir;
@@ -41,12 +39,6 @@ void Configure::destory()
     delete _instance;
     _instance = NULL;
   }
-}
-
-//获取加密机密钥
-std::string Configure::get_aes_key()
-{
-  return _aes_key;
 }
 
 // 获取配置目录
@@ -142,7 +134,6 @@ std::string Configure::get_work_dir()
 // 构造函数
 Configure::Configure(const std::string& config_filename)
 {
-  _aesc = NULL;
   _config_file = NULL;
   _sleep_interval = 0;
   std::string filename(get_conf_dir() + C_DOT + config_filename);
@@ -150,7 +141,6 @@ Configure::Configure(const std::string& config_filename)
   if(file_exist(filename)) {
     _config_file = new ConfigFile(filename);
   }
-  _aesc = new AESCrypt(_aes_key);
 }
 
 // 析构函数
@@ -159,10 +149,6 @@ Configure::~Configure()
   if(_config_file) {
     delete _config_file;
     _config_file = NULL;
-  }
-  if(_aesc) {
-    delete _aesc;
-    _aesc = NULL;
   }
 }
 

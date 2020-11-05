@@ -28,7 +28,6 @@
 #define UNIX_DOMAIN ".unix.domain"
 
 #include "ConfigFile.hpp"
-#include "AESCrypt.hpp"
 #include <string>
 
 class Configure
@@ -56,7 +55,6 @@ class Configure
     static std::string _home_dir;
     static std::string _log_dir;
     static std::string _work_dir;
-    AESCrypt* _aesc;
     ConfigFile* _config_file;
     unsigned int _sleep_interval;
     std::string _daemon_name;
