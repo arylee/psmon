@@ -1,5 +1,6 @@
 # psmon
 Process monitor. Currently only support linux system. If those process that had been configured was killed or exit normally, it will be relaunched.
+This is an alternative of supervisor writen by Python, or pm2 writen by node.js. It's written by C++.
 
 Hello.jar and Hello2.jar are the same. It only print hello message using "System.out.println" then sleep 5 seconds in a dead loop. Please read Hello.java in the work directory. Parameters for spring cloud is useless here, just because there is a bug to using such parameters and now had been fixed.
 
