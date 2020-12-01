@@ -1,0 +1,18 @@
+[Unit]
+Description=Process Monitor
+Before=multi-user.target
+Before=graphical.target
+Before=shutdown.target
+After=network-online.target
+Conflicts=shutdown.target
+
+[Service]
+User=ary
+Group=ary
+Type=simple
+Restart=always
+ExecStart=/home/ary/psmon/bin/psmon
+Environment=PSMON_HOME=/home/ary/psmon
+
+[Install]
+WantedBy=multi-user.target
