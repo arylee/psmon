@@ -20,9 +20,9 @@
 #include <semaphore.h>
 #include <sys/stat.h>
 
-const std::string VERSION_INFO("0.1.1.6");
+const std::string VERSION_INFO("0.1.1.18");
 
-const std::string BUILD_DATETIME("2020-10-30 16:00:00");
+const std::string BUILD_DATETIME("2020-12-01 10:00:00");
 
 const std::string VERSION_MESSAGE("Version:[" + VERSION_INFO + "], last build datetime:[" + BUILD_DATETIME + "].");
 
@@ -82,10 +82,10 @@ sem_t* PsmonDaemon::_semaphore = NULL;
 PsmonDaemon* PsmonDaemon::_instance = NULL;
 
 // 创建单态实例
-PsmonDaemon* PsmonDaemon::instance(const std::string& daemon_name)
+PsmonDaemon* PsmonDaemon::instance(const std::string& daemon_name, bool daemon_mode)
 {
   if(!_instance) {
-    _instance = new PsmonDaemon(daemon_name);
+    _instance = new PsmonDaemon(daemon_name, daemon_mode);
   }
   return _instance;
 }
@@ -106,8 +106,9 @@ void PsmonDaemon::version()
 }
 
 // 构造函数
-PsmonDaemon::PsmonDaemon(const std::string& daemon_name)
+PsmonDaemon::PsmonDaemon(const std::string& daemon_name, bool daemon_mode)
 {
+  daemon = daemon_mode;
   _daemon_name = daemon_name;
 }
 

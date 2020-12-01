@@ -24,10 +24,10 @@
 class PsmonDaemon : public BaseDaemon
 {
   public:
-    static PsmonDaemon* instance(const std::string& daemon_name);
+    static PsmonDaemon* instance(const std::string& daemon_name, bool daemon_mode);
     static void destory();
     static void version();
-    PsmonDaemon(const std::string& daemon_name);
+    PsmonDaemon(const std::string& daemon_name, bool daemon_mode);
     virtual ~PsmonDaemon();
     virtual bool init();
     virtual bool prepare();

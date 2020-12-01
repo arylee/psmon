@@ -22,4 +22,4 @@ export PSMON_HOME=`pwd`
 
 ./pscli start hello
 
-If you kill psomn with -9, you should use "./psmon -d" before restart it.
+If you kill psomn with -9, you should use "./psmon -s" before restart it.

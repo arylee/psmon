@@ -16,6 +16,7 @@ class BaseDaemon
 {
   public:
     static bool running;
+    static bool daemon;
     void run();
   protected:
     static void skeleton_daemon();
