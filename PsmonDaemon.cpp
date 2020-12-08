@@ -20,9 +20,9 @@
 #include <semaphore.h>
 #include <sys/stat.h>
 
-const std::string VERSION_INFO("0.1.1.18");
+const std::string VERSION_INFO("0.1.1.20");
 
-const std::string BUILD_DATETIME("2020-12-01 10:00:00");
+const std::string BUILD_DATETIME("2020-12-08 18:30:00");
 
 const std::string VERSION_MESSAGE("Version:[" + VERSION_INFO + "], last build datetime:[" + BUILD_DATETIME + "].");
 
@@ -134,10 +134,12 @@ PsmonDaemon::~PsmonDaemon()
 // 初始化
 bool PsmonDaemon::init()
 {
-  _semaphore = sem_open(_daemon_name.c_str(), O_CREAT | O_EXCL, 0644, 0);
-  if(SEM_FAILED == _semaphore) {
-    LOG_ERROR_MSG("Cannot create semaphore, maybe the daemon already started.");
-    return false;
+  if(daemon) {
+    _semaphore = sem_open(_daemon_name.c_str(), O_CREAT | O_EXCL, 0644, 0);
+    if(SEM_FAILED == _semaphore) {
+      LOG_ERROR_MSG("Cannot create semaphore, maybe the daemon already started.");
+      return false;
+    }
   }
   return true;
 }

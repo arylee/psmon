@@ -17,7 +17,7 @@ void usage()
 {
   std::cout << "Usage:" << std::endl;
   std::cout << "\t psmon" << std::endl;
-  std::cout << "\t\t Start psmon as a daemon service without arguments." << std::endl;
+  std::cout << "\t\t Start psmon as a systemd service without arguments." << std::endl;
   std::cout << "\t psmon -d" << std::endl;
   std::cout << "\t psmon --daemon" << std::endl;
   std::cout << "\t\t Running psomn as a daemon service." << std::endl;
