@@ -20,9 +20,9 @@
 #include <semaphore.h>
 #include <sys/stat.h>
 
-const std::string VERSION_INFO("0.1.1.20");
+const std::string VERSION_INFO("0.1.1.24");
 
-const std::string BUILD_DATETIME("2020-12-08 18:30:00");
+const std::string BUILD_DATETIME("2020-12-23 15:00:00");
 
 const std::string VERSION_MESSAGE("Version:[" + VERSION_INFO + "], last build datetime:[" + BUILD_DATETIME + "].");
 

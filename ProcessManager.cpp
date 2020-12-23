@@ -93,21 +93,20 @@ std::string ProcessManager::start(std:: string name)
   std::string msg = S_NO_WORKER;
   // 锁定线程锁，STL中的map并不是线程安全的
   pthread_mutex_lock(_mutex);
-  for(std::map<std::string, WorkerProcess>::iterator it = _processes.begin(); it != _processes.end(); it++) {
-    if(0 == name.compare(it->first)) {
+  std::map<std::string, WorkerProcess>::iterator it = _processes.find(name); 
+  if(it != _processes.end()) {    
+    pid_t pid = it->second.get_pid();
+    if(pid > 0) {
+      LOG_INFO_MSG("Worker process:[" + name + "] already started.");
+      msg = S_SKIP;
+    } else {
       LOG_INFO_MSG("Work process:[" + name + "] will start.");
-      pid_t pid = it->second.get_pid();
-      if(pid > 0) {
-        msg = S_ERROR;
+      it->second.set_pid(-1);
+      if(it->second.launch()) {
+        msg = S_OK;
       } else {
-        it->second.set_pid(-1);
-        if(it->second.launch()) {
-          msg = S_OK;
-        } else {
-          msg = S_ERROR;
-        }
+        msg = S_ERROR;
       }
-      break;
     }
   }
   // 释放线程锁，STL中的map并不是线程安全的
@@ -121,23 +120,22 @@ std::string ProcessManager::stop(std:: string name)
   std::string msg = S_NO_WORKER;
   // 锁定线程锁，STL中的map并不是线程安全的
   pthread_mutex_lock(_mutex);
-  for(std::map<std::string, WorkerProcess>::iterator it = _processes.begin(); it != _processes.end(); it++) {
-    if(0 == name.compare(it->first)) {
+  std::map<std::string, WorkerProcess>::iterator it = _processes.find(name);
+  if(it != _processes.end()) {
+    pid_t pid = it->second.get_pid();
+    if(pid > 0) {
       LOG_INFO_MSG("Work process:[" + name + "] will stop.");
-      pid_t pid = it->second.get_pid();
-      if(pid > 0) {
-        if(kill(pid, SIGKILL)) {
-          LOG_ERROR_MSG("Failed to kill worker process:[" + std::to_string(pid) + "].");
-          msg = S_ERROR;
-        } else {
-          it->second.set_pid(0);
-          LOG_INFO_MSG("Worker process:[" + std::to_string(pid) + "] was killed.");
-          msg = S_OK;
-        }
-      } else {
+      if(kill(pid, SIGKILL)) {
+        LOG_ERROR_MSG("Failed to kill worker process:[" + std::to_string(pid) + "].");
         msg = S_ERROR;
+      } else {
+        it->second.set_pid(0);
+        LOG_INFO_MSG("Worker process:[" + std::to_string(pid) + "] was killed.");
+        msg = S_OK;
       }
-      break;
+    } else {
+      LOG_INFO_MSG("Worker process:[" + name + "] already stopped.");
+      msg = S_SKIP;
     }
   }
   // 释放线程锁，STL中的map并不是线程安全的

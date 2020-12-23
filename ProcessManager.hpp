@@ -17,6 +17,7 @@
 
 #define S_OK "OK"
 #define S_ERROR "ERROR"
+#define S_SKIP "SKIP"
 #define S_NO_WORKER "NO SUCH WORKER"
 
 class ProcessManager {

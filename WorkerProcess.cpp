@@ -44,8 +44,8 @@ bool WorkerProcess::launch() {
     argv[_tokens.size()] = NULL;
 
     LOG_DEBUG_MSG("Starting worker:[" + _name + "] process using command:[" + _command + "].");
-    pid_t pid = fork();
-    switch(pid) {
+    _pid = fork();
+    switch(_pid) {
       case -1:  // 创建新进程失败
         LOG_ERROR_MSG("Error creating child process using fork.");
         break;
@@ -71,7 +71,6 @@ bool WorkerProcess::launch() {
         }
         break;
       default:  // 父进程
-        _pid = pid;
         LOG_INFO_MSG("Worker:[" + _name + "] process with command:[" + _command + "] now running PID:[" + std::to_string(_pid) + "].");
     }
   }
