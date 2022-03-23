@@ -8,6 +8,7 @@
 */
 
 #include "ProcessManager.hpp"
+#include "BaseDaemon.hpp"
 #include "Logger.hpp"
 #include "Utils.hpp"
 #include <iterator>
@@ -19,10 +20,10 @@
 ProcessManager* ProcessManager::_instance;
 
 // 创建单态实例
-ProcessManager* ProcessManager::instance(std::string filename) 
+ProcessManager* ProcessManager::instance(std::string filename, bool auto_start) 
 {
   if(!_instance) {
-    _instance = new ProcessManager(filename);
+    _instance = new ProcessManager(filename, auto_start);
   }
   return _instance;
 }
@@ -37,8 +38,10 @@ void ProcessManager::destory()
 }
 
 // 构造函数
-ProcessManager::ProcessManager(std::string filename)
+ProcessManager::ProcessManager(std::string filename, bool auto_start)
 {
+  _auto_start = auto_start;
+  _filename = filename;
   // 创建线程锁，并初始化
   _mutex = new pthread_mutex_t();
   pthread_mutex_init(_mutex, NULL);
@@ -64,7 +67,7 @@ ProcessManager::ProcessManager(std::string filename)
       } catch(const char* msg) {
         LOG_INFO_MSG("Work process:[" + section + "] will use default daemon work dir:[" + Configure::get_work_dir() + "].");
       }
-      _processes[section] = WorkerProcess(section, command, work_dir);
+      _processes[section] = WorkerProcess(section, command, work_dir, auto_start);
     }
     // 释放线程锁，STL中的map并不是线程安全的
     pthread_mutex_unlock(_mutex);
@@ -172,7 +175,12 @@ void ProcessManager::start_worker_processes()
   pthread_mutex_unlock(_mutex);
   // 检查子进程结束并回收，防止子进程变成僵尸进程
   int status = 0;
-  pid_t pid = waitpid(-1, &status, WUNTRACED | WCONTINUED);
+  pid_t pid;
+  if(_auto_start) {
+    pid = waitpid(-1, &status, WNOHANG | WUNTRACED | WCONTINUED);
+  } else {
+    pid = waitpid(-1, &status, WUNTRACED | WCONTINUED);
+  }
   if (pid > 0) {
     bool should_relaunch = false;
     if(WIFEXITED(status)) {
@@ -215,3 +223,54 @@ void ProcessManager::relaunch(int old_pid)
   // 释放线程锁，STL中的map并不是线程安全的
   pthread_mutex_unlock(_mutex);
 }
+
+// 重新加载配置文件
+std::string ProcessManager::reload()
+{
+  if(file_exist(_filename)) {
+    // 释放之前已经加载的文件
+    if(_config_file) {
+      delete _config_file;
+    _config_file = NULL;
+    }
+    _config_file = new ConfigFile(_filename);
+    // 锁定线程锁，STL中的map并不是线程安全的
+    pthread_mutex_lock(_mutex);
+    // 删除已经停止的，未在配置文件中的工作线程
+    for(std::map<std::string, WorkerProcess>::iterator it = _processes.begin(); it != _processes.end(); it++) {
+      if(!_config_file->has_section(it->first)) {
+        int pid = it->second.get_pid();
+        if(pid > 0) {
+          LOG_INFO_MSG("Worker process:[" + it->first + "] are still running with PID:[" + std::to_string(pid) + "].");
+        } else {
+          _processes.erase(it->first);
+        }
+      }
+    }
+    // 新增配置文件中加入的工作线程
+    std::list<std::string>* sections = _config_file->get_sections();
+    std::list<std::string>::const_iterator ci = sections->begin();
+    while(ci != sections->end()) {
+      std::string section = *ci++;
+      std::map<std::string, WorkerProcess>::const_iterator ci = _processes.find(section);
+      if(_processes.end() == ci) {
+        std::string command = _config_file->value(section, S_COMMAND);
+        std::string work_dir;
+        LOG_DEBUG_MSG("Found section:[" + section + "], command:[" + command + "].");
+        try {
+          work_dir = _config_file->value(section, S_WORK_DIR);
+          LOG_INFO_MSG("Worker process:[" + section + "] will use self defined work dir:[" + work_dir + "].");
+        } catch(const char* msg) {
+          LOG_INFO_MSG("Worker process:[" + section + "] will use default daemon work dir:[" + Configure::get_work_dir() + "].");
+        }
+        _processes[section] = WorkerProcess(section, command, work_dir, _auto_start);
+      }
+    }
+    // 释放线程锁，STL中的map并不是线程安全的
+    pthread_mutex_unlock(_mutex);
+    return S_OK;
+  } else {
+    return S_ERROR;
+  }
+}
+

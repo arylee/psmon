@@ -15,7 +15,7 @@
 class WorkerProcess {
   public:
     WorkerProcess();
-    WorkerProcess(std::string name, std::string command, std::string work_dir);
+    WorkerProcess(std::string name, std::string command, std::string work_dir, bool auto_start);
     ~WorkerProcess();
     bool launch();
     void relaunch(int old_pid);

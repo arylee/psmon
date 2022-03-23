@@ -183,3 +183,13 @@ std::string Configure::get_conf_filename()
 {
   return _config_file->value(S_DAEMON, S_CONF_NAME);
 }
+
+// 获取自动启动应用的配置信息
+bool Configure::get_auto_start()
+{
+  try {
+    return atoi(_config_file->value(S_DAEMON, S_AUTO_START).c_str()) > 0;
+  } catch(const char* msg) {
+    return true;
+  }
+}

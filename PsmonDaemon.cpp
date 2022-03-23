@@ -20,9 +20,9 @@
 #include <semaphore.h>
 #include <sys/stat.h>
 
-const std::string VERSION_INFO("0.1.1.24");
+const std::string VERSION_INFO("0.1.1.25");
 
-const std::string BUILD_DATETIME("2020-12-23 15:00:00");
+const std::string BUILD_DATETIME("2022-03-23 20:00:00");
 
 const std::string VERSION_MESSAGE("Version:[" + VERSION_INFO + "], last build datetime:[" + BUILD_DATETIME + "].");
 
@@ -50,6 +50,8 @@ void* process_unix_socket(void* p)
           case 1:
             if(0 == tokens[0].compare(S_CMD_STATUS)) {
               msg = ((ProcessManager*) p)->status();
+	    } else if(0 == tokens[0].compare(S_CMD_RELOAD)) {
+              response = ((ProcessManager*) p)->reload();
             } else {
               msg = S_SYNTAX_ERROR;
             }
@@ -59,6 +61,10 @@ void* process_unix_socket(void* p)
               msg = ((ProcessManager*) p)->start(tokens[1]);
             } else if(0 == tokens[0].compare(S_CMD_STOP)) {
               msg = ((ProcessManager*) p)->stop(tokens[1]);
+            } else if(0 == tokens[0].compare(S_CMD_RESTART)) {
+              response = ((ProcessManager*) p)->stop(tokens[1]);
+              sleep(1);
+              response += " - " + ((ProcessManager*) p)->start(tokens[1]);
             } else {
               msg = S_SYNTAX_ERROR;
             }
@@ -147,7 +153,9 @@ bool PsmonDaemon::init()
 // 准备处理
 bool PsmonDaemon::prepare()
 {
-  _ps_man = ProcessManager::instance(_configure->get_conf_dir() + _configure->get_conf_filename());
+  bool result = false;
+  _ps_man = ProcessManager::instance(_configure->get_conf_dir() + _configure->get_conf_filename(),
+      _configure->get_auto_start());
   if(NULL == _ps_man) {
     LOG_ERROR_MSG("Cannot instance class ProcessingManager, maybe not enough memory.");
     return false;
@@ -156,9 +164,11 @@ bool PsmonDaemon::prepare()
   if(!unixSocket) {
     unixSocket = new SocketUnix(UNIX_DOMAIN);
   }
-  bool result = unixSocket->start_server();
-  pthread_t thread;
-  pthread_create(&thread, NULL, process_unix_socket, _ps_man);
+  result = unixSocket->start_server();
+  if(result) {
+    pthread_t threadUnix;
+    pthread_create(&threadUnix, NULL, process_unix_socket, _ps_man);
+  }
   return result;
 }
 

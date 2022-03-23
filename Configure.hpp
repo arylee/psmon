@@ -12,6 +12,7 @@
 #define S_DAEMON "daemon"
 #define S_SLEEP_INTL "sleep_interval"
 #define S_CONF_NAME "config"
+#define S_AUTO_START "auto_start"
 
 #define S_CONF "conf"
 #define S_DATA "data"
@@ -35,7 +36,6 @@ class Configure
   public:
     static Configure* instance(const std::string& config_filename);
     static void destory();
-    static std::string get_aes_key();
     static std::string get_conf_dir();
     static std::string get_data_dir();
     static std::string get_home_dir();
@@ -44,6 +44,7 @@ class Configure
     bool configured();
     unsigned int get_sleep_interval();
     std::string get_conf_filename();
+    bool get_auto_start();
   protected:
     static Configure* _instance;
     Configure(const std::string& config_filename);

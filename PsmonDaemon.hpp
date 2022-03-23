@@ -18,6 +18,8 @@
 #define S_CMD_STATUS "cmd:status"
 #define S_CMD_START "cmd:start"
 #define S_CMD_STOP "cmd:stop"
+#define S_CMD_RESTART "cmd:restart"
+#define S_CMD_RELOAD "cmd:reload"
 
 #define S_SYNTAX_ERROR "SYNTAX ERROR"
 

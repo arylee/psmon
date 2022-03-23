@@ -18,9 +18,13 @@
 WorkerProcess::WorkerProcess() { }
 
 // 构造函数
-WorkerProcess::WorkerProcess(std::string name, std::string command, std::string work_dir)
+WorkerProcess::WorkerProcess(std::string name, std::string command, std::string work_dir, bool auto_start)
 {
-  _pid = -1;
+  if(auto_start) {
+    _pid = -1;
+  } else {
+    _pid = 0;
+  }
   _name = name;
   _command = command;
   _work_dir = work_dir;
