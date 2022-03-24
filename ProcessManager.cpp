@@ -20,10 +20,10 @@
 ProcessManager* ProcessManager::_instance;
 
 // 创建单态实例
-ProcessManager* ProcessManager::instance(std::string filename, bool auto_start) 
+ProcessManager* ProcessManager::instance(std::string filename) 
 {
   if(!_instance) {
-    _instance = new ProcessManager(filename, auto_start);
+    _instance = new ProcessManager(filename);
   }
   return _instance;
 }
@@ -38,9 +38,8 @@ void ProcessManager::destory()
 }
 
 // 构造函数
-ProcessManager::ProcessManager(std::string filename, bool auto_start)
+ProcessManager::ProcessManager(std::string filename)
 {
-  _auto_start = auto_start;
   _filename = filename;
   // 创建线程锁，并初始化
   _mutex = new pthread_mutex_t();
@@ -67,6 +66,10 @@ ProcessManager::ProcessManager(std::string filename, bool auto_start)
       } catch(const char* msg) {
         LOG_INFO_MSG("Work process:[" + section + "] will use default daemon work dir:[" + Configure::get_work_dir() + "].");
       }
+      bool auto_start = true;
+      try {
+        auto_start = atoi(_config_file->value(section, S_AUTO_START).c_str()) > 0;
+      } catch(const char* msg) { }
       _processes[section] = WorkerProcess(section, command, work_dir, auto_start);
     }
     // 释放线程锁，STL中的map并不是线程安全的
@@ -128,13 +131,31 @@ std::string ProcessManager::stop(std:: string name)
     pid_t pid = it->second.get_pid();
     if(pid > 0) {
       LOG_INFO_MSG("Work process:[" + name + "] will stop.");
-      if(kill(pid, SIGKILL)) {
-        LOG_ERROR_MSG("Failed to kill worker process:[" + std::to_string(pid) + "].");
+      if(kill(pid, SIGTERM)) {
+        LOG_ERROR_MSG("Failed to send SIGTERM to worker process:[" + std::to_string(pid) + "].");
         msg = S_ERROR;
       } else {
         it->second.set_pid(0);
-        LOG_INFO_MSG("Worker process:[" + std::to_string(pid) + "] was killed.");
+        LOG_INFO_MSG("Send SIGTERM to worker process:[" + std::to_string(pid) + "] successful.");
         msg = S_OK;
+      }
+      bool needKill = true;
+      for(int i = 0; i < 3; i++) {
+        if(!kill(pid, 0)) {
+          needKill = false;
+          break;
+        }
+        sleep(1);
+      }
+      if(needKill) {
+        if(kill(pid, SIGKILL)) {
+          LOG_ERROR_MSG("Failed to send SIGKILL to worker process:[" + std::to_string(pid) + "].");
+          msg = S_ERROR;
+        } else {
+          it->second.set_pid(0);
+          LOG_INFO_MSG("Send SIGKILL to worker process:[" + std::to_string(pid) + "] successful.");
+          msg = S_OK;
+        }
       }
     } else {
       LOG_INFO_MSG("Worker process:[" + name + "] already stopped.");
@@ -176,11 +197,7 @@ void ProcessManager::start_worker_processes()
   // 检查子进程结束并回收，防止子进程变成僵尸进程
   int status = 0;
   pid_t pid;
-  if(_auto_start) {
-    pid = waitpid(-1, &status, WNOHANG | WUNTRACED | WCONTINUED);
-  } else {
-    pid = waitpid(-1, &status, WUNTRACED | WCONTINUED);
-  }
+  pid = waitpid(-1, &status, WNOHANG | WUNTRACED | WCONTINUED);
   if (pid > 0) {
     bool should_relaunch = false;
     if(WIFEXITED(status)) {
@@ -263,7 +280,11 @@ std::string ProcessManager::reload()
         } catch(const char* msg) {
           LOG_INFO_MSG("Worker process:[" + section + "] will use default daemon work dir:[" + Configure::get_work_dir() + "].");
         }
-        _processes[section] = WorkerProcess(section, command, work_dir, _auto_start);
+        bool auto_start = true;
+        try {
+          auto_start = atoi(_config_file->value(section, S_AUTO_START).c_str()) > 0;
+        } catch(const char* msg) { }
+        _processes[section] = WorkerProcess(section, command, work_dir, auto_start);
       }
     }
     // 释放线程锁，STL中的map并不是线程安全的

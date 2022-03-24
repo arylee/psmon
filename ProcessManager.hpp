@@ -22,7 +22,7 @@
 
 class ProcessManager {
   public:
-    static ProcessManager* instance(std::string filename, bool auto_start);
+    static ProcessManager* instance(std::string filename);
     static void destory();
     static ProcessManager* _instance;
     std::string start(std:: string name);
@@ -31,11 +31,10 @@ class ProcessManager {
     std::string reload();
     void start_worker_processes();
   protected:
-    ProcessManager(std::string filename, bool auto_start);
+    ProcessManager(std::string filename);
     ~ProcessManager();
   private:
     pthread_mutex_t* _mutex;
-    bool _auto_start;
     std::string _filename;
     ConfigFile* _config_file;
     std::map<std::string, WorkerProcess> _processes;

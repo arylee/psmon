@@ -20,9 +20,9 @@
 #include <semaphore.h>
 #include <sys/stat.h>
 
-const std::string VERSION_INFO("0.1.1.25");
+const std::string VERSION_INFO("0.1.1.26");
 
-const std::string BUILD_DATETIME("2022-03-23 20:00:00");
+const std::string BUILD_DATETIME("2022-03-24 12:30:00");
 
 const std::string VERSION_MESSAGE("Version:[" + VERSION_INFO + "], last build datetime:[" + BUILD_DATETIME + "].");
 
@@ -32,7 +32,6 @@ SocketUnix* unixSocket = NULL;
 void* process_unix_socket(void* p)
 {
   std::string request;
-  std::string response;
   pthread_detach(pthread_self());
   while(unixSocket && BaseDaemon::running) {
     if(unixSocket->socket_accept()) {
@@ -45,34 +44,34 @@ void* process_unix_socket(void* p)
         while(iss >> token) {
           tokens.push_back(token);
         }
-        std::string msg;
+        std::string response;
         switch(tokens.size()) {
           case 1:
             if(0 == tokens[0].compare(S_CMD_STATUS)) {
-              msg = ((ProcessManager*) p)->status();
-	    } else if(0 == tokens[0].compare(S_CMD_RELOAD)) {
+              response = ((ProcessManager*) p)->status();
+	          } else if(0 == tokens[0].compare(S_CMD_RELOAD)) {
               response = ((ProcessManager*) p)->reload();
             } else {
-              msg = S_SYNTAX_ERROR;
+              response = S_SYNTAX_ERROR;
             }
             break;
           case 2:
             if(0 == tokens[0].compare(S_CMD_START)) {
-              msg = ((ProcessManager*) p)->start(tokens[1]);
+              response = ((ProcessManager*) p)->start(tokens[1]);
             } else if(0 == tokens[0].compare(S_CMD_STOP)) {
-              msg = ((ProcessManager*) p)->stop(tokens[1]);
+              response = ((ProcessManager*) p)->stop(tokens[1]);
             } else if(0 == tokens[0].compare(S_CMD_RESTART)) {
               response = ((ProcessManager*) p)->stop(tokens[1]);
               sleep(1);
               response += " - " + ((ProcessManager*) p)->start(tokens[1]);
             } else {
-              msg = S_SYNTAX_ERROR;
+              response = S_SYNTAX_ERROR;
             }
             break;
           default:
-            msg = S_SYNTAX_ERROR;
+            response = S_SYNTAX_ERROR;
         }
-        unixSocket->write_message(msg);
+        unixSocket->write_message(response);
       }
       unixSocket->close_client();
       sleep(1);
@@ -154,8 +153,7 @@ bool PsmonDaemon::init()
 bool PsmonDaemon::prepare()
 {
   bool result = false;
-  _ps_man = ProcessManager::instance(_configure->get_conf_dir() + _configure->get_conf_filename(),
-      _configure->get_auto_start());
+  _ps_man = ProcessManager::instance(_configure->get_conf_dir() + _configure->get_conf_filename());
   if(NULL == _ps_man) {
     LOG_ERROR_MSG("Cannot instance class ProcessingManager, maybe not enough memory.");
     return false;
