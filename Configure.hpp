@@ -10,9 +10,9 @@
 #define __CONFIGURE_HPP__
 
 #define S_DAEMON "daemon"
-#define S_SLEEP_INTL "sleep_interval"
+#define S_SLEEP_INTL "sleep-interval"
 #define S_CONF_NAME "config"
-#define S_AUTO_START "auto_start"
+#define S_AUTO_START "auto-start"
 
 #define S_CONF "conf"
 #define S_DATA "data"
