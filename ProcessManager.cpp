@@ -254,15 +254,17 @@ std::string ProcessManager::reload()
     // 锁定线程锁，STL中的map并不是线程安全的
     pthread_mutex_lock(_mutex);
     // 删除已经停止的，未在配置文件中的工作线程
-    for(std::map<std::string, WorkerProcess>::iterator it = _processes.begin(); it != _processes.end(); it++) {
+    for(std::map<std::string, WorkerProcess>::iterator it = _processes.begin(); it != _processes.end(); ) {
       if(!_config_file->has_section(it->first)) {
         int pid = it->second.get_pid();
         if(pid > 0) {
           LOG_INFO_MSG("Worker process:[" + it->first + "] are still running with PID:[" + std::to_string(pid) + "].");
         } else {
-          _processes.erase(it->first);
+          _processes.erase(it++);
+          continue;
         }
       }
+      it++;
     }
     // 新增配置文件中加入的工作线程
     std::list<std::string>* sections = _config_file->get_sections();
