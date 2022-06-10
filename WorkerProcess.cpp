@@ -100,3 +100,19 @@ void WorkerProcess::set_pid(pid_t pid)
 {
   _pid = pid;
 }
+
+// 设置工作进程的命令
+void WorkerProcess::set_command(std::string command) {
+  if(_command.compare(command) != 0) {
+    LOG_INFO_MSG("Worker:[" + _name + "] process changed command from:[" + _command + "] to:[" + command + "].");
+    _command = command;
+  }
+}
+
+// 设置工作进程的工作目录
+void WorkerProcess::set_work_dir(std::string work_dir) {
+  if(_work_dir.compare(work_dir) != 0) {
+    LOG_INFO_MSG("Worker:[" + _name + "] process changed command from:[" + _work_dir + "] to:[" + work_dir + "].");
+    _work_dir = work_dir;
+  }
+}

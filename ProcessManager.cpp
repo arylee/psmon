@@ -253,9 +253,18 @@ std::string ProcessManager::reload()
     _config_file = new ConfigFile(_filename);
     // 锁定线程锁，STL中的map并不是线程安全的
     pthread_mutex_lock(_mutex);
-    // 删除已经停止的，未在配置文件中的工作线程
     for(std::map<std::string, WorkerProcess>::iterator it = _processes.begin(); it != _processes.end(); ) {
-      if(!_config_file->has_section(it->first)) {
+      if(_config_file->has_section(it->first)) {
+        // 更新现有的工作进程配置
+        std::string command = _config_file->value(it->first, S_COMMAND);
+        std::string work_dir;
+        try {
+          work_dir = _config_file->value(it->first, S_WORK_DIR);
+        } catch(const char* msg) { }
+        it->second.set_command(command);
+        it->second.set_work_dir(work_dir);
+      } else {
+        // 删除已经停止的，未在配置文件中的工作进程
         int pid = it->second.get_pid();
         if(pid > 0) {
           LOG_INFO_MSG("Worker process:[" + it->first + "] are still running with PID:[" + std::to_string(pid) + "].");
@@ -266,7 +275,7 @@ std::string ProcessManager::reload()
       }
       it++;
     }
-    // 新增配置文件中加入的工作线程
+    // 新增配置文件中加入的工作进程
     std::list<std::string>* sections = _config_file->get_sections();
     std::list<std::string>::const_iterator ci = sections->begin();
     while(ci != sections->end()) {

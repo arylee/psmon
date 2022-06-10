@@ -12,11 +12,27 @@
 #include <iostream>
 #include <sstream>
 
+void usage()
+{
+  std::cout << "Run this program with arguments which to send to the PSMON daemon!" << std::endl;
+  std::cout << "Usage:" << std::endl;
+  std::cout << "  pscli reload" << std::endl;
+  std::cout << "    Reload all configuration, process must be stopped before deleting." << std::endl;
+  std::cout << "  pscli status" << std::endl;
+  std::cout << "    Show status of all configured process." << std::endl;
+  std::cout << "  pscli start hello" << std::endl;
+  std::cout << "    Start process named 'hello', change it to the configured process name." << std::endl;
+  std::cout << "  pscli stop hello" << std::endl;
+  std::cout << "    Stop process named 'hello', change it to the configured process name." << std::endl;
+  std::cout << "  pscli restart hello" << std::endl;
+  std::cout << "    Restart process named 'hello', change it to the configured process name." << std::endl;
+}
+
 int main(int argc, char** argv)
 {
   switch(argc) {
     case 1:
-      std::cout << "Run this program with arguments which to send to the PSMON daemon!" << std::endl;
+      usage();
       break;
     default:
       SocketUnix socket(Configure::get_home_dir() + UNIX_DOMAIN);

@@ -16,20 +16,20 @@
 void usage()
 {
   std::cout << "Usage:" << std::endl;
-  std::cout << "\t psmon" << std::endl;
-  std::cout << "\t\t Start psmon as a systemd service without arguments." << std::endl;
-  std::cout << "\t psmon -d" << std::endl;
-  std::cout << "\t psmon --daemon" << std::endl;
-  std::cout << "\t\t Running psomn as a daemon service." << std::endl;
-  std::cout << "\t psmon -h" << std::endl;
-  std::cout << "\t psmon --help" << std::endl;
-  std::cout << "\t\t Echo this help message." << std::endl;
-  std::cout << "\t psmon -s" << std::endl;
-  std::cout << "\t psmon --delete_semaphore" << std::endl;
-  std::cout << "\t\t Delete semaphore. Make sure psomn is not running!" << std::endl;
-  std::cout << "\t psmon -v" << std::endl;
-  std::cout << "\t psmon --version" << std::endl;
-  std::cout << "\t\t Display the virsion information." << std::endl << std::endl;
+  std::cout << "  psmon" << std::endl;
+  std::cout << "    Start psmon as a systemd service without arguments." << std::endl;
+  std::cout << "  psmon -d" << std::endl;
+  std::cout << "  psmon --daemon" << std::endl;
+  std::cout << "    Running psomn as a daemon service." << std::endl;
+  std::cout << "  psmon -h" << std::endl;
+  std::cout << "  psmon --help" << std::endl;
+  std::cout << "    Display this help message." << std::endl;
+  std::cout << "  psmon -s" << std::endl;
+  std::cout << "  psmon --delete_semaphore" << std::endl;
+  std::cout << "    Delete semaphore. Make sure psomn is not running!" << std::endl;
+  std::cout << "  psmon -v" << std::endl;
+  std::cout << "  psmon --version" << std::endl;
+  std::cout << "    Display the virsion information." << std::endl << std::endl;
 }
 
 int main(int argc, char** argv)

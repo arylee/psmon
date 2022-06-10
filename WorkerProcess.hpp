@@ -21,6 +21,8 @@ class WorkerProcess {
     void relaunch(int old_pid);
     pid_t get_pid();
     void set_pid(pid_t pid);
+    void set_command(std::string command);
+    void set_work_dir(std::string work_dir);
   private:
     int _length;
     pid_t _pid;
