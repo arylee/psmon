@@ -57,9 +57,15 @@ ProcessManager::ProcessManager(std::string filename)
     std::list<std::string>::const_iterator ci = sections->begin();
     while(ci != sections->end()) {
       std::string section = *ci++;
-      std::string command = _config_file->value(section, S_COMMAND);
+      std::string command;
+      try {
+        command = _config_file->value(section, S_COMMAND);
+        LOG_DEBUG_MSG("Found section:[" + section + "], command:[" + command + "].");
+      } catch(const char* msg) {
+        LOG_WARN_MSG("Command config not found in work porcess:[" + section + "].");
+        continue;
+      }
       std::string work_dir;
-      LOG_DEBUG_MSG("Found section:[" + section + "], command:[" + command + "].");
       try {
         work_dir = _config_file->value(section, S_WORK_DIR);
         LOG_INFO_MSG("Work process:[" + section + "] will use self defined work dir:[" + work_dir + "].");
